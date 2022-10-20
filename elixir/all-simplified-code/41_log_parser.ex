@@ -1,3 +1,5 @@
+# Concept: Regular Expressions
+
 defmodule LogParser do
   def valid_line?(line), do: String.match?(line, ~r/^\[DEBUG|INFO|WARNING|ERROR\]/)
 
