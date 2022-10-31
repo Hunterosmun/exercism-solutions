@@ -12,27 +12,10 @@ defmodule ProteinTranslation do
 
   defp of_rna(rna, acc) do
     {codon, rest} = String.split_at(rna, 3)
-    less_than_three = String.length(codon) < 3
 
-    case codon do
-      codon when less_than_three -> {:error, "invalid RNA"}
-      "UGU" -> of_rna(rest, ["Cysteine" | acc])
-      "UGC" -> of_rna(rest, ["Cysteine" | acc])
-      "UUA" -> of_rna(rest, ["Leucine" | acc])
-      "UUG" -> of_rna(rest, ["Leucine" | acc])
-      "AUG" -> of_rna(rest, ["Methionine" | acc])
-      "UUU" -> of_rna(rest, ["Phenylalanine" | acc])
-      "UUC" -> of_rna(rest, ["Phenylalanine" | acc])
-      "UCU" -> of_rna(rest, ["Serine" | acc])
-      "UCC" -> of_rna(rest, ["Serine" | acc])
-      "UCA" -> of_rna(rest, ["Serine" | acc])
-      "UCG" -> of_rna(rest, ["Serine" | acc])
-      "UGG" -> of_rna(rest, ["Tryptophan" | acc])
-      "UAU" -> of_rna(rest, ["Tyrosine" | acc])
-      "UAC" -> of_rna(rest, ["Tyrosine" | acc])
-      "UAA" -> of_rna("", acc)
-      "UAG" -> of_rna("", acc)
-      "UGA" -> of_rna("", acc)
+    case of_codon(codon) do
+      {:ok, "STOP"} -> of_rna("", acc)
+      {:ok, result} -> of_rna(rest, [result | acc])
       _ -> {:error, "invalid RNA"}
     end
   end
