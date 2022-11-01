@@ -19,7 +19,7 @@ defmodule TopSecret do
     string
     |> to_ast()
     |> chunk_small()
-    |> Enum.map(fn l -> decode_secret_message_part(l, []) |> elem(1) end)
+    |> Enum.map(&(decode_secret_message_part(&1, []) |> elem(1)))
     |> Enum.join()
   end
 
@@ -29,7 +29,7 @@ defmodule TopSecret do
       {:def, _, [thing, _]} -> [thing]
       {:defp, _, [{:when, _, [thing, _]}, _]} -> [thing]
       {:defp, _, [thing, _]} -> [thing]
-      ast when is_list(ast) -> Enum.flat_map(ast, fn l -> break_down(l) end)
+      ast when is_list(ast) -> Enum.flat_map(ast, &break_down/1)
       _ -> []
     end
   end
@@ -40,7 +40,7 @@ defmodule TopSecret do
       {:do, thing} -> [thing]
       {:__block__, _, stuff} -> chunk_small(stuff)
       {:defmodule, _, thing} -> chunk_small(thing)
-      ast when is_list(ast) -> Enum.flat_map(ast, fn t -> chunk_small(t) end)
+      ast when is_list(ast) -> Enum.flat_map(ast, &chunk_small/1)
       _ -> [ast]
     end
   end
