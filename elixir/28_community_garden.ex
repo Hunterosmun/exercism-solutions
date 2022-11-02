@@ -6,7 +6,8 @@ end
 
 defmodule CommunityGarden do
   def start(opts \\ []) do
-    Counter.start_link(0)
+    # could have used __MODULE__ instead of :Count, but this way seemed more clear
+    Agent.start_link(fn -> 0 end, name: :Count)
     Agent.start(fn -> opts end)
   end
 
@@ -15,8 +16,8 @@ defmodule CommunityGarden do
   end
 
   def register(pid, register_to) do
-    Counter.increment()
-    new_entry = %Plot{plot_id: Counter.value(), registered_to: register_to}
+    Agent.update(:Count, &(&1 + 1))
+    new_entry = %Plot{plot_id: Agent.get(:Count, & &1), registered_to: register_to}
     Agent.update(pid, fn x -> [new_entry | x] end)
     new_entry
   end
@@ -31,21 +32,5 @@ defmodule CommunityGarden do
       {:not_found, "plot is unregistered"},
       fn %Plot{plot_id: id, registered_to: _} -> id == plot_id end
     )
-  end
-end
-
-defmodule Counter do
-  use Agent
-
-  def start_link(initial_value) do
-    Agent.start_link(fn -> initial_value end, name: __MODULE__)
-  end
-
-  def value do
-    Agent.get(__MODULE__, & &1)
-  end
-
-  def increment do
-    Agent.update(__MODULE__, &(&1 + 1))
   end
 end
