@@ -22,8 +22,8 @@ defmodule CommunityGarden do
     # First thing in that tuple is what you return from the function,
     # the second is how you want to update your state
     Agent.get_and_update(pid, fn {id, list} ->
-      {%Plot{plot_id: id, registered_to: register_to},
-       {id + 1, [%Plot{plot_id: id, registered_to: register_to} | list]}}
+      plot = %Plot{plot_id: id, registered_to: register_to}
+      {plot, {id + 1, [plot | list]}}
     end)
   end
 
