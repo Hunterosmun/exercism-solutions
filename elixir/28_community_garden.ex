@@ -7,25 +7,30 @@ defmodule Plot do
 end
 
 defmodule CommunityGarden do
+  # if we put a `use Agent` here and changed `Agent.start` to `Agent.start_link` we would have an easier time getting this into a supervisor tree
+  # This is because it would give you a default child_spec, which supervisors need
   def start(opts \\ []) do
-    # could have used __MODULE__ instead of :Count, but this way seemed more clear
-    Agent.start_link(fn -> 0 end, name: :Count)
-    Agent.start(fn -> opts end)
+    Agent.start(fn -> {1, opts} end)
   end
 
   def list_registrations(pid) do
-    Agent.get(pid, & &1)
+    Agent.get(pid, fn {_, list} -> list end)
   end
 
   def register(pid, register_to) do
-    Agent.update(:Count, &(&1 + 1))
-    new_entry = %Plot{plot_id: Agent.get(:Count, & &1), registered_to: register_to}
-    Agent.update(pid, fn x -> [new_entry | x] end)
-    new_entry
+    # Agent.get_and_update -> In the anonymous function you need to return a tuple.
+    # First thing in that tuple is what you return from the function,
+    # the second is how you want to update your state
+    Agent.get_and_update(pid, fn {id, list} ->
+      {%Plot{plot_id: id, registered_to: register_to},
+       {id + 1, [%Plot{plot_id: id, registered_to: register_to} | list]}}
+    end)
   end
 
   def release(pid, plot_id) do
-    Agent.update(pid, fn plots -> Enum.filter(plots, fn p -> p.plot_id != plot_id end) end)
+    Agent.update(pid, fn {id, plots} ->
+      {id, Enum.filter(plots, fn p -> p.plot_id != plot_id end)}
+    end)
   end
 
   def get_registration(pid, plot_id) do
