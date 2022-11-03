@@ -10,7 +10,7 @@ defmodule CommunityGarden do
   # if we put a `use Agent` here and changed `Agent.start` to `Agent.start_link` we would have an easier time getting this into a supervisor tree
   # This is because it would give you a default child_spec, which supervisors need
   def start(opts \\ []) do
-    Agent.start(fn -> {1, opts} end)
+    Agent.start(fn -> {1, []} end, opts)
   end
 
   def list_registrations(pid) do
