@@ -9,13 +9,9 @@ end
 defmodule CommunityGarden do
   # if we put a `use Agent` here and changed `Agent.start` to `Agent.start_link` we would have an easier time getting this into a supervisor tree
   # This is because it would give you a default child_spec, which supervisors need
-  def start(opts \\ []) do
-    Agent.start(fn -> {1, []} end, opts)
-  end
+  def start(opts \\ []), do: Agent.start(fn -> {1, []} end, opts)
 
-  def list_registrations(pid) do
-    Agent.get(pid, fn {_, list} -> list end)
-  end
+  def list_registrations(pid), do: Agent.get(pid, fn {_, list} -> list end)
 
   def register(pid, register_to) do
     # Agent.get_and_update -> In the anonymous function you need to return a tuple.
@@ -35,9 +31,6 @@ defmodule CommunityGarden do
 
   def get_registration(pid, plot_id) do
     list_registrations(pid)
-    |> Enum.find(
-      {:not_found, "plot is unregistered"},
-      fn %Plot{plot_id: id, registered_to: _} -> id == plot_id end
-    )
+    |> Enum.find({:not_found, "plot is unregistered"}, fn %Plot{plot_id: id} -> id == plot_id end)
   end
 end
